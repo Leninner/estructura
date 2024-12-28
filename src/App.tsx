@@ -1,3 +1,4 @@
+import { Game } from "./pages/Game";
 import { Lobby } from "./pages/Lobby";
 import { useGame } from "./store/useGame";
 
@@ -7,9 +8,7 @@ function App() {
   return (
     <>
       {
-        hasStarted ? (
-          <h1>Game</h1>
-        ) : <Lobby />
+        hasStarted ? <Game /> : <Lobby />
       }
     </>
   );

@@ -7,8 +7,8 @@ export const useWords = create<{
   pickedWords: string[];
   restart: () => void;
   addExtraWord: (word: string) => void;
-  pickWord: () => void;
-}>((set) => ({
+  pickWord: () => string;
+}>((set, get) => ({
   words: INITIAL_WORDS,
   extraWords: [],
   pickedWords: [],
@@ -16,13 +16,13 @@ export const useWords = create<{
   addExtraWord: (word: string) =>
     set((state) => ({ extraWords: [...state.extraWords, word] })),
   pickWord: () => {
-    set((state) => {
-      const pickedWord = resolveUnusedWord(state);
+    const word = resolveUnusedWord([...get().extraWords, ...get().words]);
 
-      return {
-        pickedWords: [...state.pickedWords, pickedWord],
-      };
-    });
+    set((state) => ({
+      pickedWords: [...state.pickedWords, word],
+    }));
+    
+    return word;
   },
 }));
 
@@ -30,23 +30,23 @@ const generateRandomIndex = (size: number): number => {
   return Math.floor(Math.random() * size);
 };
 
-const resolveUnusedWord = (state: ReturnType<typeof useWords.getState>): string => {
+const resolveUnusedWord = (words: string[], extraWords: string[] = [], pickedWords = []): string => {
   const randomIndex = generateRandomIndex(
-    state.words.length + state.extraWords.length,
+    words.length + extraWords.length,
   );
 
-  const alreadyUsed = state.pickedWords.find(
+  const alreadyUsed = pickedWords.find(
     (word) =>
-      word === state.words[randomIndex] ||
-      word === state.extraWords[randomIndex - state.words.length],
+      word === words[randomIndex] ||
+      word === extraWords[randomIndex - words.length],
   );
 
   if (alreadyUsed) {
-    return resolveUnusedWord(state);
+    return resolveUnusedWord(words, extraWords);
   }
 
   return (
-    state.words[randomIndex] ||
-    state.extraWords[randomIndex - state.words.length]
+    words[randomIndex] ||
+    extraWords[randomIndex - words.length] || ""
   );
 };

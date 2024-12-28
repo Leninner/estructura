@@ -2,26 +2,30 @@ import { create } from "zustand";
 
 export const useGame = create<{
   rounds: number;
+  currentRound: number;
   hasStarted: boolean;
+  hasFinished: boolean;
   startGame: () => void;
   participants: {
     name: string;
     score: number;
-    missed: number;
   }[];
   dismissScore: (participant: string) => void;
   increaseScore: (participant: string) => void;
   setRounds: (rounds: number) => void;
   addParticipant: (participant: string) => void;
   removeParticipant: (participantIndex: number) => void;
-  finishRound: () => void;
+  advanceRound: () => void;
   getLeaderboard: () => Record<string, number>;
+  finishGame: () => void;
 }>((set, get) => ({
   hasStarted: false,
+  hasFinished: false,
   startGame: () => set({ hasStarted: true }),
   rounds: 0,
+  currentRound: 0,
   participants: [],
-  setRounds: (rounds: number) => set({ rounds }),
+  setRounds: (rounds: number) => set({ rounds, currentRound: 1 }),
   addParticipant: (participant: string) =>
     set((state) => {
       const alreadyInGame = state.participants.some(
@@ -48,13 +52,21 @@ export const useGame = create<{
         participants: newParticipants
       }
     }),
-  finishRound: () =>
+  advanceRound: () =>
     set((state) => {
-      const newRounds = state.rounds - 1;
+      const newRound = state.currentRound + 1;
+
+      if (newRound > state.rounds) {
+        get().finishGame();
+      }
 
       return {
-        rounds: newRounds,
+        currentRound: newRound,
       };
+    }),
+  finishGame: () =>
+    set({
+      hasFinished: true,
     }),
   dismissScore: (participant) =>
     set((state) => {
@@ -70,7 +82,6 @@ export const useGame = create<{
 
       newParticipants[participantIndex] = {
         ...newParticipants[participantIndex],
-        missed: newParticipants[participantIndex].missed + 1,
         score: newParticipants[participantIndex].score - 1,
       };
 
