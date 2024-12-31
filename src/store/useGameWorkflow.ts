@@ -1,11 +1,9 @@
 import { create } from "zustand";
 
-const MAX_ATTEMPTS = 5;
+export const MAX_ATTEMPTS = 7;
 
 export const useGameWorkflow = create<{
 	currentWord: string;
-	currentUser: string;
-	setCurrentUser: (user: string) => void;
 	userAttemptsLog: Record<string, { goodAttempts: string[]; badAttempts: number }>;
 	userCanTry: (user: string) => boolean;
 	trackUserLog: (user: string, letter: string) => void;
@@ -14,10 +12,6 @@ export const useGameWorkflow = create<{
 	resetAttempts: () => void;
 	setCurrentWord: (word: string) => void;
 }>((set, get) => ({
-	currentUser: "",
-	setCurrentUser: (user: string) => {
-		set({ currentUser: user });
-	},
 	currentWord: "",
 	userAttemptsLog: {},
 	userCanTry: (user: string) => {

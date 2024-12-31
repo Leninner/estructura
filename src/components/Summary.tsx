@@ -3,9 +3,10 @@ interface SummaryProps {
 	rounds: number;
 	currentRound: number;
 	hasFinished: boolean;
+	currentUser: string;
 }
 
-export const Summary: React.FC<SummaryProps> = ({ word, rounds, hasFinished, currentRound }) => {
+export const Summary: React.FC<SummaryProps> = ({ word, rounds, hasFinished, currentRound, currentUser }) => {
 	return (
 		<div className="text-center bg-yellow-100 p-6 rounded-lg shadow-md">
 			<h1 className="text-6xl font-extrabold text-green-600 mb-4">Palabra de {word.length} letras</h1>
@@ -14,6 +15,7 @@ export const Summary: React.FC<SummaryProps> = ({ word, rounds, hasFinished, cur
 
 				<p>Rondas: {rounds}</p>
 				<p>Ronda actual: {currentRound}</p>
+				<p>Usuario actual: {currentUser}</p>
 			</div>
 		</div>
 	);

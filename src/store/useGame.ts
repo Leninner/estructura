@@ -9,6 +9,7 @@ export const useGame = create<{
   participants: {
     name: string;
     score: number;
+    roundsGuessed: number;
   }[];
   dismissScore: (participant: string) => void;
   increaseScore: (participant: string) => void;
@@ -18,10 +19,78 @@ export const useGame = create<{
   advanceRound: () => void;
   getLeaderboard: () => Record<string, number>;
   finishGame: () => void;
+  getRandomParticipant: () => string;
+  allHasParticipateInRound: () => boolean;
+  saveUserRoundAttempt: (user: string, attempts: {badAttempts: number, goodAttempts: string[]}) => void;
 }>((set, get) => ({
   hasStarted: false,
   hasFinished: false,
   startGame: () => set({ hasStarted: true }),
+  saveUserRoundAttempt: (user, attempts) => {
+    set((state) => {
+      const participantIndex = state.participants.findIndex(
+        (p) => p.name === user,
+      );
+
+      if (participantIndex === -1) {
+        return state;
+      }
+      const score = attempts.goodAttempts.length - attempts.badAttempts;
+
+      const newParticipants = [...state.participants];
+
+      newParticipants[participantIndex] = {
+        ...newParticipants[participantIndex],
+        roundsGuessed: newParticipants[participantIndex].roundsGuessed + 1,
+        score: newParticipants[participantIndex].score + (score > 0 ? score : 0),
+      };
+
+      return {
+        participants: newParticipants,
+      };
+    });
+  },
+  allHasParticipateInRound: () => get().participants.every(p => p.roundsGuessed >= get().currentRound),
+  getRandomParticipant: () => {
+    if (get().participants.every(p => p.roundsGuessed >= get().currentRound)) {
+      console.log('All participants have already guessed this round, finishing the round...');
+      get().advanceRound();
+      return get().getRandomParticipant();
+    }
+
+    const getParticipant = () => {
+      const randomIndex = Math.floor(Math.random() * get().participants.length);
+      const name = get().participants[randomIndex].name;
+
+      if (get().participants[randomIndex].roundsGuessed >= get().currentRound) {
+        console.log('This participant has already guessed this round, picking another one...');
+        return getParticipant();
+      }
+
+      return name;
+    }
+
+    const participant = getParticipant();
+
+    set((state) => {
+      const participantIndex = state.participants.findIndex(
+        (p) => p.name === participant,
+      );
+
+      const newParticipants = [...state.participants];
+
+      newParticipants[participantIndex] = {
+        ...newParticipants[participantIndex],
+        roundsGuessed: newParticipants[participantIndex].roundsGuessed + 1,
+      };
+
+      return {
+        participants: newParticipants,
+      };
+    });
+
+    return participant;
+  },
   rounds: 0,
   currentRound: 0,
   participants: [],
@@ -36,7 +105,7 @@ export const useGame = create<{
         return state;
       }
 
-      const newParticipants = [...state.participants, { name: participant, score: 0, missed: 0 }];
+      const newParticipants = [...state.participants, { name: participant, score: 0, missed: 0, roundsGuessed: 0 }];
 
       return {
         participants: newParticipants,
@@ -56,13 +125,20 @@ export const useGame = create<{
     set((state) => {
       const newRound = state.currentRound + 1;
 
-      if (newRound > state.rounds) {
+      if(state.currentRound >= state.rounds) {
+        alert('The game has finished!');
         get().finishGame();
+        return state;
       }
 
-      return {
-        currentRound: newRound,
-      };
+      if(get().participants.every(p => p.roundsGuessed >= state.currentRound)) {
+        return {
+          currentRound: newRound,
+        }
+      }
+
+      alert('There are still participants that have not guessed the word, please wait for them to finish.');
+      return state;
     }),
   finishGame: () =>
     set({

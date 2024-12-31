@@ -1,7 +1,8 @@
-import { BodyComponent } from "./BodyComponent";
-import { HeadComponent } from "./HeadComponent";
-import { LimbComponent } from "./LimbComponent";
+import { GallowsComposite } from "./GallowsComposite";
 import { RopeComponent } from "./RopeComponent";
+import { HeadComponent } from "./HeadComponent";
+import { BodyComponent } from "./BodyComponent";
+import { LimbComponent } from "./LimbComponent";
 
 const BASE_STROKE_WIDTH = 5;
 
@@ -10,17 +11,16 @@ interface GallowsComponentProps {
 }
 
 export const GallowsComponent = ({ errors }: GallowsComponentProps) => {
-	const COMPONENTS_TO_DRAW = [
-		<RopeComponent />,
-		<HeadComponent />,
-		<BodyComponent />,
-		<LimbComponent limb="leftArm" />,
-		<LimbComponent limb="rightArm" />,
-		<LimbComponent limb="leftLeg" />,
-		<LimbComponent limb="rightLeg" />,
-	]
+	const composite = new GallowsComposite();
+	composite.add(new RopeComponent());
+	composite.add(new HeadComponent());
+	composite.add(new BodyComponent());
+	composite.add(new LimbComponent("leftArm"));
+	composite.add(new LimbComponent("rightArm"));
+	composite.add(new LimbComponent("leftLeg"));
+	composite.add(new LimbComponent("rightLeg"));
 
-	const componentsToDraw = COMPONENTS_TO_DRAW.slice(0, errors);
+	const componentsToDraw = composite.render().props.children.slice(0, errors);
 
 	return (
 		<svg height="300" width="200" className="gallows">
@@ -36,7 +36,7 @@ export const GallowsComponent = ({ errors }: GallowsComponentProps) => {
 			{/* Soporte diagonal */}
 			<line x1="50" y1="100" x2="100" y2="50" stroke="black" strokeWidth={BASE_STROKE_WIDTH} />
 
-			{/*componentes a dibujar*/}
+			{/* Componentes a dibujar */}
 			{componentsToDraw}
 		</svg>
 	);
