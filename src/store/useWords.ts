@@ -32,7 +32,10 @@ export const useWords = create<{
     const { wordTree, extraWords, pickedWords } = get();
 
     const word = wordTree.pickRandom() || extraWords.pickRandom();
-    if(!word) return 'NO_WORDS';
+
+    if (!word) {
+      throw new Error("No more words available");
+    }
 
     set({ pickedWords: [...pickedWords, word] });
     return word;

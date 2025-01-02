@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create  } from "zustand";
 
 type Participant = { name: string; score: number; roundsGuessed: number };
 
@@ -7,8 +7,8 @@ export const useGame = create<{
   currentRound: number;
   hasStarted: boolean;
   hasFinished: boolean;
-  startGame: () => void;
   participants: Participant[];
+  startGame: () => void;
   dismissScore: (participant: string) => void;
   increaseScore: (participant: string) => void;
   setRounds: (rounds: number) => void;
@@ -26,6 +26,9 @@ export const useGame = create<{
 }>((set, get) => ({
   hasStarted: false,
   hasFinished: false,
+  rounds: 0,
+  currentRound: 1,
+  participants: [],
   startGame: () => set({ hasStarted: true }),
   saveUserRoundAttempt: (user, attempts) => {
     set((state) => {
@@ -89,10 +92,7 @@ export const useGame = create<{
 
     return getParticipant();
   },
-  rounds: 0,
-  currentRound: 0,
-  participants: [],
-  setRounds: (rounds: number) => set({ rounds, currentRound: 1 }),
+  setRounds: (rounds: number) => set({ rounds }),
   addParticipant: (participant: string) =>
     set((state) => {
       const alreadyInGame = state.participants.some(

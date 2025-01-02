@@ -4,7 +4,7 @@ interface SummaryProps {
 	currentRound: number;
 	hasFinished: boolean;
 	currentUser: string;
-	leaderboard?: Map<string, number>; // Nuevo campo para mostrar el marcador
+	leaderboard?: Map<string, number>;
 }
 
 export const Summary: React.FC<SummaryProps> = ({
@@ -54,6 +54,7 @@ export const Summary: React.FC<SummaryProps> = ({
 					</div>
 					<button
 						className="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] border-2 border-black transform hover:scale-105 transition"
+						onClick={() => window.location.reload()}
 					>
 						Reiniciar juego
 					</button>

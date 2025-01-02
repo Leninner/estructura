@@ -15,8 +15,8 @@ export const Game = () => {
 		getRandomParticipant,
 		saveUserRoundAttempt,
 		getLeaderboard
-	} = useGame((state) => state);
-	const { pickWord, wordTree, extraWords } = useWords();
+	} = useGame();
+	const { pickWord } = useWords();
 	const {
 		userAttemptsLog,
 		currentWord,
@@ -26,8 +26,6 @@ export const Game = () => {
 		resetAttempts,
 	} = useGameWorkflow();
 
-	console.log(wordTree.inOrder(), extraWords.inOrder());
-
 	const keyPressed = useKeyboard(hasFinished);
 	const [currentUser, setCurrentUser] = useState<string>("");
 
@@ -35,15 +33,12 @@ export const Game = () => {
 	useEffect(() => {
 		if (keyPressed && userCanTry(currentUser)) {
 			trackUserLog(currentUser, keyPressed);
-
-			console.log("Log actual:", userAttemptsLog[currentUser]);
 		}
 	}, [keyPressed, currentUser, userCanTry, trackUserLog]);
 
 	// Cambiar de usuario si ya no puede intentar más
 	useEffect(() => {
 		if (currentUser && !userCanTry(currentUser)) {
-			console.log("Cambiando de usuario", userCanTry(currentUser));
 			saveUserRoundAttempt(currentUser, userAttemptsLog[currentUser]);
 			setCurrentUser(getRandomParticipant());
 		}
@@ -52,8 +47,9 @@ export const Game = () => {
 	// Tomar una palabra cada que empieza una nueva ronda
 	useEffect(() => {
 		const word = pickWord();
+		console.log('pickWord', word);
 		setCurrentWord(word);
-	}, [currentRound, rounds, pickWord, setCurrentWord]);
+	}, [currentRound, pickWord, setCurrentWord]);
 
 	// establecer el primer usuario and the rest
 	useEffect(() => {
@@ -67,7 +63,7 @@ export const Game = () => {
 
 	return (
 		<div className="min-h-screen bg-gradient-to-r from-orange-400 via-yellow-500 to-pink-500 flex flex-col items-center justify-center py-10">
-			<div className="bg-gradient-to-r from-pink-500 to-orange-400 shadow-[4px_4px_0_rgba(0,0,0,1)] rounded-xl p-8 w-full max-w-2xl border-4 border-black">
+			<div className="bg-gradient-to-r from-pink-500 to-orange-400 shadow-[4px_4px_0_rgba(0,0,0,1)] rounded-xl p-8 w-full max-w-5xl border-4 border-black">
 				<Summary
 					word={currentWord}
 					hasFinished={hasFinished}
@@ -79,7 +75,7 @@ export const Game = () => {
 
 				{!hasFinished && (
 					<div className="space-y-6">
-						<div className="mt-6 bg-black p-6 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] border-2 border-white">
+						<div className="mt-6 bg-black p-6 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] border-2 border-white flex items-center justify-center">
 							<GallowsComponent
 								errors={userAttemptsLog[currentUser]?.badAttempts || 0}
 							/>
