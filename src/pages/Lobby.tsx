@@ -11,7 +11,13 @@ export const Lobby = () => {
 		startGame,
 	} = useGame((state) => state);
 
-	const { currentSetSize, addExtraWord, wordTree, extraWords, removeExtraWord } = useWords();
+	const {
+		currentSetSize,
+		addExtraWord,
+		wordTree,
+		extraWords,
+		removeExtraWord,
+	} = useWords();
 
 	const [roundQuantity, setRoundQuantity] = useState(0);
 
@@ -20,6 +26,11 @@ export const Lobby = () => {
 
 		if (!name) {
 			alert("El nombre del participante no puede estar vacío.");
+			return;
+		}
+
+		if (participants.some(participant => participant.name === name)) {
+			alert("El nombre del participante ya existe.");
 			return;
 		}
 
@@ -36,20 +47,41 @@ export const Lobby = () => {
 
 		const wordsArray = words.split(",").map((word) => word.trim());
 
-		const uniqueWords = [
-			...new Set([
-				...wordsArray,
-			]).values(),
-		];
+		const uniqueWords = [...new Set([...wordsArray]).values()];
 
-		const wordsFiltered = uniqueWords.filter(
-			(word) => !wordTree.inOrder().includes(word)
-		);
+		const wordsFiltered = uniqueWords
+			.filter(wordsInPredefinedSetFilter)
+			.filter(wordsWithSpacesFilter)
+			.filter(wordsWithSpecialCharactersFilter)
+			.filter(wordsInUnsafeLengthFilter);
+
+		if (wordsFiltered.length === 0) {
+			alert(
+				"No se han añadido palabras válidas. Recuerda que no pueden contener espacios, caracteres especiales o estar en el set predefinido. Además, deben tener entre 3 y 12 caracteres."
+			);
+			return;
+		}
 
 		wordsFiltered.forEach((word) => {
 			addExtraWord(word);
 		});
 	};
+
+	const wordsInPredefinedSetFilter = (word: string) => {
+		return !wordTree.inOrder().includes(word);
+	};
+
+	const wordsWithSpacesFilter = (word: string) => {
+		return !word.includes(" ");
+	};
+
+	const wordsWithSpecialCharactersFilter = (word: string) => {
+		return !/[^a-zA-Z]/.test(word);
+	};
+
+	const wordsInUnsafeLengthFilter = (word: string) => {
+		return word.length < 3 || word.length > 12;
+	}
 
 	const handleStartGame = () => {
 		if (participants.length < 2) {
@@ -81,7 +113,9 @@ export const Lobby = () => {
 						</label>
 						<div className="flex gap-2">
 							<button
-								onClick={() => setRoundQuantity((prev) => Math.max(1, prev - 1))}
+								onClick={() =>
+									setRoundQuantity((prev) => Math.max(1, prev - 1))
+								}
 								className="bg-pink-500 text-black px-4 py-2 rounded-lg hover:bg-pink-600 transition transform hover:scale-110 border-2 border-black shadow-[2px_2px_0_rgba(255,255,255,1)]"
 							>
 								-
@@ -130,7 +164,8 @@ export const Lobby = () => {
 						{roundQuantity > currentSetSize && (
 							<div>
 								<p className="text-black font-bold text-lg mb-4">
-									Por favor, añade {roundQuantity - currentSetSize} palabras adicionales.
+									Por favor, añade {roundQuantity - currentSetSize} palabras
+									adicionales.
 								</p>
 
 								<button

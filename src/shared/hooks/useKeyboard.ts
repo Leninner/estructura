@@ -5,7 +5,11 @@ export const useKeyboard = (hasFinished: boolean) => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      setKey(event.key);  
+      const keyPressed = event.key.toLowerCase();
+
+      if (/^[a-z]$/.test(keyPressed)) {
+        setKey(keyPressed);
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -19,5 +23,9 @@ export const useKeyboard = (hasFinished: boolean) => {
     window.removeEventListener("keydown", () => {});
   }
 
-  return key;
+  const resetKey = () => {
+    setKey(null);
+  }
+
+  return { key, resetKey };
 };

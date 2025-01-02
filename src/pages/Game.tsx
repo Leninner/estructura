@@ -26,7 +26,7 @@ export const Game = () => {
 		resetAttempts,
 	} = useGameWorkflow();
 
-	const keyPressed = useKeyboard(hasFinished);
+	const { key: keyPressed, resetKey } = useKeyboard(hasFinished);
 	const [currentUser, setCurrentUser] = useState<string>("");
 
 	// Track user log
@@ -59,7 +59,10 @@ export const Game = () => {
 	// Resetear intentos de usuario
 	useEffect(() => {
 		resetAttempts();
-	}, [currentRound, resetAttempts, currentUser]);
+		resetKey();
+	}, [currentRound, currentUser]);
+
+	console.log('userAttemptsLog', userAttemptsLog);
 
 	return (
 		<div className="min-h-screen bg-gradient-to-r from-orange-400 via-yellow-500 to-pink-500 flex flex-col items-center justify-center py-10">
