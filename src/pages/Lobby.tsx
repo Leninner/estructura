@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { useGame } from "../store/useGame";
+import { useWords } from "../store/useWords";
 
 export const Lobby = () => {
-	const { participants, setRounds, addParticipant, removeParticipant, startGame } = useGame(
-		(state) => state
-	);
+	const {
+		participants,
+		setRounds,
+		addParticipant,
+		removeParticipant,
+		startGame,
+	} = useGame((state) => state);
+
+	const { currentSetSize, addExtraWord, wordTree, extraWords, removeExtraWord } = useWords();
 
 	const [roundQuantity, setRoundQuantity] = useState(0);
 
@@ -17,6 +24,31 @@ export const Lobby = () => {
 		}
 
 		addParticipant(name);
+	};
+
+	const handleAddExtraWords = () => {
+		const words = prompt("Ingrese las palabras separadas por coma:");
+
+		if (!words) {
+			alert("Las palabras no pueden estar vacías.");
+			return;
+		}
+
+		const wordsArray = words.split(",").map((word) => word.trim());
+
+		const uniqueWords = [
+			...new Set([
+				...wordsArray,
+			]).values(),
+		];
+
+		const wordsFiltered = uniqueWords.filter(
+			(word) => !wordTree.inOrder().includes(word)
+		);
+
+		wordsFiltered.forEach((word) => {
+			addExtraWord(word);
+		});
 	};
 
 	const handleStartGame = () => {
@@ -32,32 +64,31 @@ export const Lobby = () => {
 
 		setRounds(roundQuantity);
 		startGame();
-	}
+	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
-			<div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-2xl">
-				<h1 className="text-3xl font-extrabold text-center mb-8 text-gray-800">
+		<div className="min-h-screen bg-gradient-to-r from-orange-400 via-yellow-500 to-pink-500 flex items-center justify-center">
+			<div className="bg-gradient-to-r from-pink-500 to-orange-400 shadow-[4px_4px_0_rgba(0,0,0,1)] rounded-xl p-8 w-full max-w-2xl border-4 border-black">
+				<h1 className="text-4xl font-extrabold text-center mb-8 text-black drop-shadow-[2px_2px_0_rgba(255,255,255,1)] tracking-wide">
 					Lobby - Juego de Ahorcado
 				</h1>
 
 				<div className="space-y-6">
-
-					<div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg shadow-md">
-						<label className="text-gray-800 font-medium text-lg flex items-center gap-2">
-							<span className="text-gray-600">Rondas:</span>
-							<span className="text-xl font-bold text-gray-900">{roundQuantity}</span>
+					<div className="flex items-center justify-between bg-black text-white p-4 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] border-2 border-white">
+						<label className="text-white font-bold text-lg flex items-center gap-2">
+							<span>Rondas:</span>
+							<span className="text-2xl font-extrabold">{roundQuantity}</span>
 						</label>
 						<div className="flex gap-2">
 							<button
 								onClick={() => setRoundQuantity((prev) => Math.max(1, prev - 1))}
-								className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition transform hover:scale-105 shadow-sm"
+								className="bg-pink-500 text-black px-4 py-2 rounded-lg hover:bg-pink-600 transition transform hover:scale-110 border-2 border-black shadow-[2px_2px_0_rgba(255,255,255,1)]"
 							>
 								-
 							</button>
 							<button
 								onClick={() => setRoundQuantity((prev) => prev + 1)}
-								className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition transform hover:scale-105 shadow-sm"
+								className="bg-pink-500 text-black px-4 py-2 rounded-lg hover:bg-pink-600 transition transform hover:scale-110 border-2 border-black shadow-[2px_2px_0_rgba(255,255,255,1)]"
 							>
 								+
 							</button>
@@ -66,12 +97,12 @@ export const Lobby = () => {
 
 					<div>
 						<div className="flex justify-between items-center mb-4">
-							<h2 className="text-xl font-semibold text-gray-800 mb-4">
+							<h2 className="text-2xl font-extrabold text-black">
 								Participantes ({participants.length}):
 							</h2>
 							<button
 								onClick={handleAddParticipant}
-								className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition transform hover:scale-105 max-w-fit"
+								className="bg-green-500 text-black px-6 py-3 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] border-2 border-black hover:bg-green-600 transition transform hover:scale-110"
 							>
 								Añadir Participante
 							</button>
@@ -81,12 +112,12 @@ export const Lobby = () => {
 							{participants.map((participant, index) => (
 								<li
 									key={index}
-									className="bg-gray-100 text-gray-800 px-4 py-3 rounded-lg shadow-md flex justify-between items-center"
+									className="bg-yellow-500 text-black px-4 py-3 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] flex justify-between items-center border-2 border-black"
 								>
 									<span className="font-medium">{participant.name}</span>
 									<button
 										onClick={() => removeParticipant(index)}
-										className="bg-red-500 text-white px-3 py-2 rounded-md shadow-md hover:bg-red-600 transition transform hover:scale-105"
+										className="bg-red-500 text-black px-3 py-2 rounded-md shadow-[2px_2px_0_rgba(255,255,255,1)] hover:bg-red-600 transition transform hover:scale-110 border-2 border-black"
 									>
 										Eliminar
 									</button>
@@ -94,14 +125,65 @@ export const Lobby = () => {
 							))}
 						</ul>
 					</div>
+
+					<div>
+						{roundQuantity > currentSetSize && (
+							<div>
+								<p className="text-black font-bold text-lg mb-4">
+									Por favor, añade {roundQuantity - currentSetSize} palabras adicionales.
+								</p>
+
+								<button
+									onClick={handleAddExtraWords}
+									className="bg-blue-500 text-black px-6 py-3 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] border-2 border-black hover:bg-blue-600 transition transform"
+								>
+									Añadir Palabras
+								</button>
+							</div>
+						)}
+
+						{extraWords.size() > 0 && (
+							<>
+								<div className="flex justify-between items-center mb-4">
+									<h2 className="text-2xl font-extrabold text-black">
+										Palabras Adicionales ({extraWords.size()}):
+									</h2>
+								</div>
+
+								<ul className="space-y-3 max-h-96 overflow-y-auto">
+									{extraWords.inOrder().map((word, index) => (
+										<li
+											key={index}
+											className="bg-teal-500 text-black px-4 py-3 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] flex justify-between items-center border-2 border-black"
+										>
+											<span className="font-medium">{word}</span>
+
+											<button
+												onClick={() => removeExtraWord(word)}
+												className="bg-red-500 text-black px-3 py-2 rounded-md shadow-[2px_2px_0_rgba(255,255,255,1)] hover:bg-red-600 transition transform hover:scale-110 border-2 border-black"
+											>
+												Eliminar
+											</button>
+										</li>
+									))}
+								</ul>
+							</>
+						)}
+					</div>
+
 					<button
-						className="w-full bg-purple-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-purple-700 transition transform hover:scale-105"
+						className="w-full bg-purple-600 text-black px-6 py-3 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] hover:bg-purple-700 transition transform disabled:opacity-50 border-2 border-black"
 						onClick={handleStartGame}
+						disabled={
+							participants.length < 2 ||
+							roundQuantity < 1 ||
+							roundQuantity > currentSetSize
+						}
 					>
 						Iniciar Juego
 					</button>
 				</div>
 			</div>
 		</div>
-	)
+	);
 };

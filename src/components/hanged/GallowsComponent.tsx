@@ -5,6 +5,7 @@ import { BodyComponent } from "./BodyComponent";
 import { LimbComponent } from "./LimbComponent";
 
 const BASE_STROKE_WIDTH = 5;
+const BASE_STROKE_COLOR = "white";
 
 interface GallowsComponentProps {
 	errors: number;
@@ -25,16 +26,16 @@ export const GallowsComponent = ({ errors }: GallowsComponentProps) => {
 	return (
 		<svg height="300" width="200" className="gallows">
 			{/* Poste vertical */}
-			<line x1="50" y1="50" x2="50" y2="250" stroke="black" strokeWidth={BASE_STROKE_WIDTH} />
+			<line x1="50" y1="50" x2="50" y2="250" stroke={BASE_STROKE_COLOR} strokeWidth={BASE_STROKE_WIDTH} />
 
 			{/* Barra superior */}
-			<line x1="50" y1="50" x2="150" y2="50" stroke="black" strokeWidth={BASE_STROKE_WIDTH} />
+			<line x1="50" y1="50" x2="150" y2="50" stroke={BASE_STROKE_COLOR} strokeWidth={BASE_STROKE_WIDTH} />
 
 			{/* Soporte base */}
-			<line x1="30" y1="250" x2="70" y2="250" stroke="black" strokeWidth={BASE_STROKE_WIDTH} />
+			<line x1="30" y1="250" x2="70" y2="250" stroke={BASE_STROKE_COLOR} strokeWidth={BASE_STROKE_WIDTH} />
 
 			{/* Soporte diagonal */}
-			<line x1="50" y1="100" x2="100" y2="50" stroke="black" strokeWidth={BASE_STROKE_WIDTH} />
+			<line x1="50" y1="100" x2="100" y2="50" stroke={BASE_STROKE_COLOR} strokeWidth={BASE_STROKE_WIDTH} />
 
 			{/* Componentes a dibujar */}
 			{componentsToDraw}

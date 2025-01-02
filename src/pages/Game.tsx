@@ -13,11 +13,10 @@ export const Game = () => {
 		hasFinished,
 		currentRound,
 		getRandomParticipant,
-		advanceRound,
-		allHasParticipateInRound,
-		saveUserRoundAttempt
+		saveUserRoundAttempt,
+		getLeaderboard
 	} = useGame((state) => state);
-	const { pickWord } = useWords();
+	const { pickWord, wordTree, extraWords } = useWords();
 	const {
 		userAttemptsLog,
 		currentWord,
@@ -27,44 +26,31 @@ export const Game = () => {
 		resetAttempts,
 	} = useGameWorkflow();
 
-	const keyPressed = useKeyboard();
-	const [currentUser, setCurrentUser] = useState<string>("");
+	console.log(wordTree.inOrder(), extraWords.inOrder());
 
-	// Avanzar de ronda
-	useEffect(() => {
-		if (allHasParticipateInRound()) {
-			resetAttempts();
-			advanceRound();
-		}
-	}, [
-		userAttemptsLog
-	]);
+	const keyPressed = useKeyboard(hasFinished);
+	const [currentUser, setCurrentUser] = useState<string>("");
 
 	// Track user log
 	useEffect(() => {
 		if (keyPressed && userCanTry(currentUser)) {
 			trackUserLog(currentUser, keyPressed);
 
-			console.log("Tecla presionada:", keyPressed);
 			console.log("Log actual:", userAttemptsLog[currentUser]);
 		}
 	}, [keyPressed, currentUser, userCanTry, trackUserLog]);
 
 	// Cambiar de usuario si ya no puede intentar más
 	useEffect(() => {
-		if (!userCanTry(currentUser)) {
+		if (currentUser && !userCanTry(currentUser)) {
+			console.log("Cambiando de usuario", userCanTry(currentUser));
 			saveUserRoundAttempt(currentUser, userAttemptsLog[currentUser]);
 			setCurrentUser(getRandomParticipant());
 		}
-	}, [currentUser, userCanTry, getRandomParticipant]);
+	}, [userAttemptsLog]);
 
 	// Tomar una palabra cada que empieza una nueva ronda
 	useEffect(() => {
-		if (currentRound > rounds) {
-			alert("Fin del juego");
-			return;
-		}
-
 		const word = pickWord();
 		setCurrentWord(word);
 	}, [currentRound, rounds, pickWord, setCurrentWord]);
@@ -72,38 +58,42 @@ export const Game = () => {
 	// establecer el primer usuario and the rest
 	useEffect(() => {
 		setCurrentUser(getRandomParticipant());
-	}, [currentRound, getRandomParticipant]);
+	}, [getRandomParticipant, currentRound]);
 
 	// Resetear intentos de usuario
 	useEffect(() => {
 		resetAttempts();
-	}, [currentRound, resetAttempts]);
+	}, [currentRound, resetAttempts, currentUser]);
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 py-10">
-			{/* Summary */}
-			<Summary
-				word={currentWord}
-				hasFinished={hasFinished}
-				rounds={rounds}
-				currentRound={currentRound}
-				currentUser={currentUser}
-			/>
-
-			{/* Gallows */}
-			<div className="mt-6">
-				<GallowsComponent
-					errors={userAttemptsLog[currentUser]?.badAttempts || 0}
-				/>
-			</div>
-
-			{/* Word Placeholder */}
-			<div className="mt-6">
-				<WordPlaceholder
+		<div className="min-h-screen bg-gradient-to-r from-orange-400 via-yellow-500 to-pink-500 flex flex-col items-center justify-center py-10">
+			<div className="bg-gradient-to-r from-pink-500 to-orange-400 shadow-[4px_4px_0_rgba(0,0,0,1)] rounded-xl p-8 w-full max-w-2xl border-4 border-black">
+				<Summary
 					word={currentWord}
-					letters={[...(userAttemptsLog[currentUser]?.goodAttempts || "")]}
+					hasFinished={hasFinished}
+					rounds={rounds}
+					currentRound={currentRound}
+					currentUser={currentUser}
+					leaderboard={hasFinished ? getLeaderboard() : undefined}
 				/>
+
+				{!hasFinished && (
+					<div className="space-y-6">
+						<div className="mt-6 bg-black p-6 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] border-2 border-white">
+							<GallowsComponent
+								errors={userAttemptsLog[currentUser]?.badAttempts || 0}
+							/>
+						</div>
+
+						<div className="bg-yellow-500 p-6 rounded-lg shadow-[2px_2px_0_rgba(255,255,255,1)] border-2 border-black">
+							<WordPlaceholder
+								word={currentWord}
+								letters={[...(userAttemptsLog[currentUser]?.goodAttempts || "")]}
+							/>
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
-	);
+	)
 };

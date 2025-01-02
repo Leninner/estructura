@@ -19,7 +19,11 @@ export const useGameWorkflow = create<{
 		if (!userLog) {
 			return true;
 		}
-		return userLog.badAttempts < MAX_ATTEMPTS && userLog.goodAttempts.length < get().currentWord.length;
+
+		const hasWon = get().currentWord.split("").every((letter) => userLog.goodAttempts.includes(letter));
+		const hasLost = userLog.badAttempts >= MAX_ATTEMPTS;
+
+		return !hasWon && !hasLost;
 	},
 	trackUserLog: (user: string, letter: string) => {
 		if (get().currentWord.includes(letter.toLowerCase())) {

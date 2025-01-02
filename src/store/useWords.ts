@@ -1,52 +1,46 @@
 import { INITIAL_WORDS } from "../shared/constants";
 import { create } from "zustand";
+import { WordTree } from "../utils/word-tree";
 
 export const useWords = create<{
-  words: string[];
-  extraWords: string[];
+  currentSetSize: number;
+  wordTree: WordTree;
+  extraWords: WordTree;
   pickedWords: string[];
   restart: () => void;
   addExtraWord: (word: string) => void;
   pickWord: () => string;
+  removeExtraWord: (word: string) => void;
 }>((set, get) => ({
-  words: INITIAL_WORDS,
-  extraWords: [],
+  currentSetSize: INITIAL_WORDS.length,
+  wordTree: new WordTree(INITIAL_WORDS),
+  extraWords: new WordTree([]),
   pickedWords: [],
-  restart: () => set({ pickedWords: [], extraWords: [] }),
+  restart: () =>
+    set({
+      pickedWords: [],
+      extraWords: new WordTree([]),
+      wordTree: new WordTree(INITIAL_WORDS),
+    }),
   addExtraWord: (word: string) =>
-    set((state) => ({ extraWords: [...state.extraWords, word] })),
+    set((state) => {
+      const tree = state.extraWords;
+      tree.insert(word);
+      return { extraWords: tree, currentSetSize: state.currentSetSize + 1 };
+    }),
   pickWord: () => {
-    const word = resolveUnusedWord([...get().extraWords, ...get().words]);
+    const { wordTree, extraWords, pickedWords } = get();
 
-    set((state) => ({
-      pickedWords: [...state.pickedWords, word],
-    }));
-    
+    const word = wordTree.pickRandom() || extraWords.pickRandom();
+    if(!word) return 'NO_WORDS';
+
+    set({ pickedWords: [...pickedWords, word] });
     return word;
   },
+  removeExtraWord: (word: string) =>
+    set((state) => {
+      const tree = state.extraWords;
+      tree.delete(word);
+      return { extraWords: tree, currentSetSize: state.currentSetSize - 1 };
+    }),
 }));
-
-const generateRandomIndex = (size: number): number => {
-  return Math.floor(Math.random() * size);
-};
-
-const resolveUnusedWord = (words: string[], extraWords: string[] = [], pickedWords = []): string => {
-  const randomIndex = generateRandomIndex(
-    words.length + extraWords.length,
-  );
-
-  const alreadyUsed = pickedWords.find(
-    (word) =>
-      word === words[randomIndex] ||
-      word === extraWords[randomIndex - words.length],
-  );
-
-  if (alreadyUsed) {
-    return resolveUnusedWord(words, extraWords);
-  }
-
-  return (
-    words[randomIndex] ||
-    extraWords[randomIndex - words.length] || ""
-  );
-};

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export const useKeyboard = () => {
+export const useKeyboard = (hasFinished: boolean) => {
   const [key, setKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -14,6 +14,10 @@ export const useKeyboard = () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [])
+
+  if (hasFinished) {
+    window.removeEventListener("keydown", () => {});
+  }
 
   return key;
 };
