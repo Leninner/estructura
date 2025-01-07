@@ -1,6 +1,6 @@
 import { create  } from "zustand";
 
-type Participant = { name: string; score: number; roundsGuessed: number };
+type Participant = { name: string; roundsGuessed: number, deads: number, guessed: number };
 
 export const useGame = create<{
   rounds: number;
@@ -9,19 +9,17 @@ export const useGame = create<{
   hasFinished: boolean;
   participants: Participant[];
   startGame: () => void;
-  dismissScore: (participant: string) => void;
-  increaseScore: (participant: string) => void;
   setRounds: (rounds: number) => void;
   addParticipant: (participant: string) => void;
   removeParticipant: (participantIndex: number) => void;
   advanceRound: () => void;
-  getLeaderboard: () => Map<string, number>;
+  getLeaderboard: () => Map<string, { deads: number; guessed: number }>;
   finishGame: () => void;
   getRandomParticipant: () => string;
   allHasParticipateInRound: () => boolean;
   saveUserRoundAttempt: (
     user: string,
-    attempts: { badAttempts: number; goodAttempts: string[] }
+    won: boolean
   ) => void;
 }>((set, get) => ({
   hasStarted: false,
@@ -30,7 +28,7 @@ export const useGame = create<{
   currentRound: 1,
   participants: [],
   startGame: () => set({ hasStarted: true }),
-  saveUserRoundAttempt: (user, attempts) => {
+  saveUserRoundAttempt: (user, won) => {
     set((state) => {
       const participantIndex = state.participants.findIndex(
         (p) => p.name === user
@@ -39,15 +37,13 @@ export const useGame = create<{
       if (participantIndex === -1) {
         return state;
       }
-      const score = attempts.goodAttempts.length - attempts.badAttempts;
-
       const newParticipants = [...state.participants];
 
       newParticipants[participantIndex] = {
         ...newParticipants[participantIndex],
         roundsGuessed: newParticipants[participantIndex].roundsGuessed + 1,
-        score:
-          newParticipants[participantIndex].score + (score > 0 ? score : 0),
+        deads: newParticipants[participantIndex].deads + (won ? 0 : 1),
+        guessed: newParticipants[participantIndex].guessed + (won ? 1 : 0),
       };
 
       return {
@@ -105,7 +101,7 @@ export const useGame = create<{
 
       const newParticipants = [
         ...state.participants,
-        { name: participant, score: 0, missed: 0, roundsGuessed: 0 },
+        { name: participant, roundsGuessed: 0, deads: 0, guessed: 0 },
       ];
 
       return {
@@ -149,54 +145,12 @@ export const useGame = create<{
     set({
       hasFinished: true,
     }),
-  dismissScore: (participant) =>
-    set((state) => {
-      const participantIndex = state.participants.findIndex(
-        (p) => p.name === participant
-      );
-
-      if (participantIndex === -1) {
-        return state;
-      }
-
-      const newParticipants = [...state.participants];
-
-      newParticipants[participantIndex] = {
-        ...newParticipants[participantIndex],
-        score: newParticipants[participantIndex].score - 1,
-      };
-
-      return {
-        participants: newParticipants,
-      };
-    }),
-  increaseScore: (participant: string) =>
-    set((state) => {
-      const participantIndex = state.participants.findIndex(
-        (p) => p.name === participant
-      );
-
-      if (participantIndex === -1) {
-        return state;
-      }
-
-      const newParticipants = [...state.participants];
-
-      newParticipants[participantIndex] = {
-        ...newParticipants[participantIndex],
-        score: newParticipants[participantIndex].score + 1,
-      };
-
-      return {
-        participants: newParticipants,
-      };
-    }),
   getLeaderboard: () => {
-    const leaderboard = new Map<string, number>();
+    const leaderboard = new Map<string, { deads: number; guessed: number; }>();
 
     // Crear los nodos del grafo
-    get().participants.forEach(({ name, score }) => {
-      leaderboard.set(name, score);
+    get().participants.forEach(({ name, deads, guessed }) => {
+      leaderboard.set(name, { deads, guessed });
     });
 
     // Ordenar los nodos por puntuación
@@ -213,9 +167,15 @@ export const useGame = create<{
 }));
 
 const orderLeaderboard = (
-  leaderboard: Map<string, number>
-): Map<string, number> => {
+  leaderboard: Map<string, { deads: number; guessed: number }>
+): Map<string, { deads: number; guessed: number }> => {
   return new Map(
-    Array.from(leaderboard.entries()).sort(([, a], [, b]) => b - a)
+    [...leaderboard.entries()].sort((a, b) => {
+      if (a[1].guessed === b[1].guessed) {
+        return a[1].deads - b[1].deads;
+      }
+
+      return b[1].guessed - a[1].guessed;
+    })
   );
 };

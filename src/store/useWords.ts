@@ -6,10 +6,10 @@ export const useWords = create<{
   currentSetSize: number;
   wordTree: WordTree;
   extraWords: WordTree;
-  pickedWords: string[];
+  pickedWords: { user: string; word: string }[];
   restart: () => void;
   addExtraWord: (word: string) => void;
-  pickWord: () => string;
+  pickWord: (user: string, currentWord: string) => string;
   removeExtraWord: (word: string) => void;
 }>((set, get) => ({
   currentSetSize: INITIAL_WORDS.length,
@@ -28,16 +28,28 @@ export const useWords = create<{
       tree.insert(word);
       return { extraWords: tree, currentSetSize: state.currentSetSize + 1 };
     }),
-  pickWord: () => {
-    const { wordTree, extraWords, pickedWords } = get();
+  pickWord: (user: string, currentWord: string) => {
+    if (!user) {
+      return ''
+    }
 
+    const { wordTree, extraWords, pickedWords } = get();
     const word = wordTree.pickRandom() || extraWords.pickRandom();
 
     if (!word) {
       throw new Error("No more words available");
     }
 
-    set({ pickedWords: [...pickedWords, word] });
+    if (word === currentWord) {
+      return get().pickWord(user, currentWord);
+    }
+
+    if (pickedWords.some((pickedWord) => pickedWord.word === word && pickedWord.user === user)) {
+      return get().pickWord(user, currentWord);
+    }
+
+    set({ pickedWords: [...pickedWords, { user, word }], wordTree, extraWords });
+
     return word;
   },
   removeExtraWord: (word: string) =>

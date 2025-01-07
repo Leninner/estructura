@@ -4,7 +4,7 @@ interface SummaryProps {
 	currentRound: number;
 	hasFinished: boolean;
 	currentUser: string;
-	leaderboard?: Map<string, number>;
+	leaderboard?: Map<string, { deads: number; guessed: number }>;
 }
 
 export const Summary: React.FC<SummaryProps> = ({
@@ -47,7 +47,9 @@ export const Summary: React.FC<SummaryProps> = ({
 									key={name}
 									className="bg-white/30 p-3 rounded-lg shadow-[2px_2px_0_rgba(0,0,0,1)] border-2 border-black"
 								>
-									<span className="font-bold">{index + 1}.</span> {name} - {score} puntos
+									<span className="font-bold">{index + 1}.</span> {name} -{" "}
+									<span className="text-green-700 font-bold">{score.guessed} aciertos</span>,{" "}
+									<span className="text-red-700 font-bold">{score.deads} muertes</span>
 								</li>
 							))}
 						</ul>

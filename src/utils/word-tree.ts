@@ -40,7 +40,8 @@ export class WordTree {
     const randomIndex = Math.floor(Math.random() * words.length);
     const word = words[randomIndex];
 
-    this.delete(word);
+    console.log("Picking word", word);
+
     return word;
   }
 

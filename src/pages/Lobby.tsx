@@ -54,7 +54,7 @@ export const Lobby = () => {
     const wordsFiltered = uniqueWords
       .filter(wordsInPredefinedSetFilter)
       .filter(wordsInExtraWordsFilter)
-      .filter(wordsWithSpacesFilter)
+      .filter(wordsWithOneSpaceOnlyFilter)
       .filter(wordsInUnsafeLengthFilter)
       .filter(wordsWithSpecialCharactersFilter);
 
@@ -84,12 +84,12 @@ export const Lobby = () => {
     return !extraWords.inOrder().includes(word);
   };
 
-  const wordsWithSpacesFilter = (word: string) => {
-    return !word.includes(" ");
+  const wordsWithOneSpaceOnlyFilter = (word: string) => {
+    return word.split(" ").length === 2;
   };
 
   const wordsWithSpecialCharactersFilter = (word: string) => {
-    return !/[^a-zA-Z]/.test(word);
+    return !/[^a-zA-Z ]/.test(word);
   };
 
   const wordsInUnsafeLengthFilter = (word: string) => {

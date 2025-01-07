@@ -23,6 +23,7 @@ export const Game = () => {
 		trackUserLog,
 		setCurrentWord,
 		userCanTry,
+		hasUserWon,
 		resetAttempts,
 	} = useGameWorkflow();
 
@@ -39,17 +40,16 @@ export const Game = () => {
 	// Cambiar de usuario si ya no puede intentar más
 	useEffect(() => {
 		if (currentUser && !userCanTry(currentUser)) {
-			saveUserRoundAttempt(currentUser, userAttemptsLog[currentUser]);
+			saveUserRoundAttempt(currentUser, hasUserWon(currentUser));
 			setCurrentUser(getRandomParticipant());
 		}
 	}, [userAttemptsLog]);
 
-	// Tomar una palabra cada que empieza una nueva ronda
+	// Tomar una palabra cada que empieza una nueva ronda y cambia de usuario
 	useEffect(() => {
-		const word = pickWord();
-		console.log('pickWord', word);
+		const word = pickWord(currentUser, currentWord);
 		setCurrentWord(word);
-	}, [currentRound, pickWord, setCurrentWord]);
+	}, [currentRound, pickWord, setCurrentWord, currentUser]);
 
 	// establecer el primer usuario and the rest
 	useEffect(() => {
