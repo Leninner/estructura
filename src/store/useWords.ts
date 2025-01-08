@@ -11,6 +11,7 @@ export const useWords = create<{
   addExtraWord: (word: string) => void;
   pickWord: (user: string, currentWord: string) => string;
   removeExtraWord: (word: string) => void;
+  mergeExtraWords: () => void;
 }>((set, get) => ({
   currentSetSize: INITIAL_WORDS.length,
   wordTree: new WordTree(INITIAL_WORDS),
@@ -28,27 +29,37 @@ export const useWords = create<{
       tree.insert(word);
       return { extraWords: tree, currentSetSize: state.currentSetSize + 1 };
     }),
+  mergeExtraWords: () =>
+    set((state) => {
+      const words = state.extraWords.inOrder();
+      const newTree = new WordTree([...state.wordTree.inOrder(), ...words]);
+      return { wordTree: newTree, extraWords: new WordTree([]) };
+    }),
   pickWord: (user: string, currentWord: string) => {
     if (!user) {
-      return ''
+      return "";
     }
-
-    const { wordTree, extraWords, pickedWords } = get();
-    const word = wordTree.pickRandom() || extraWords.pickRandom();
+    
+    const { wordTree, pickedWords } = get();
+    const word = wordTree.pickRandom();
 
     if (!word) {
       throw new Error("No more words available");
     }
 
-    if (word === currentWord) {
+    if (word.toLowerCase() === currentWord.toLowerCase()) {
       return get().pickWord(user, currentWord);
     }
 
-    if (pickedWords.some((pickedWord) => pickedWord.word === word && pickedWord.user === user)) {
+    if (
+      pickedWords.some(
+        (pickedWord) => pickedWord.word === word && pickedWord.user === user
+      )
+    ) {
       return get().pickWord(user, currentWord);
     }
 
-    set({ pickedWords: [...pickedWords, { user, word }], wordTree, extraWords });
+    set({ pickedWords: [...pickedWords, { user, word }] });
 
     return word;
   },

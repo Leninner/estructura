@@ -70,16 +70,9 @@ export const useGame = create<{
     const getParticipant = () => {
       const randomIndex = Math.floor(Math.random() * get().participants.length);
       const name = get().participants[randomIndex].name;
-      console.log(
-        "Picking participant",
-        get().participants[randomIndex],
-        get().currentRound
-      );
 
+      // Pick another participant if the current one has already guessed the word
       if (get().participants[randomIndex].roundsGuessed >= get().currentRound) {
-        console.log(
-          "This participant has already guessed this round, picking another one..."
-        );
         return getParticipant();
       }
 

@@ -23,14 +23,32 @@ export const Summary: React.FC<SummaryProps> = ({
 						Palabra de {word.length} letras
 					</h1>
 					<div className="space-y-2">
-						<p className="text-xl font-bold text-purple-900">El juego está en progreso</p>
-						<p className="text-lg">
-							<span className="text-black">Usuario actual: </span>
-							<span className="font-bold text-purple-900">{currentUser}</span>
-						</p>
-						<div className="mt-4 text-lg">
-							<p>Rondas totales: {rounds}</p>
-							<p>Ronda actual: {currentRound}</p>
+						<p className="text-xl font-bold text-purple-900 my-2">El juego está en progreso</p>
+
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+							{/* Usuario Actual */}
+							<div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-purple-200">
+								<div className="text-center">
+									<span className="text-black">Jugador actual: </span>
+									<span className="font-bold text-purple-900 text-2xl">{currentUser}</span>
+								</div>
+							</div>
+
+							{/* Ronda Actual */}
+							<div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-purple-200">
+								<div className="text-center">
+									<span className="text-black">Ronda actual: </span>
+									<span className="font-bold text-purple-900">{currentRound}</span>
+								</div>
+							</div>
+
+							{/* Rondas Totales */}
+							<div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-purple-200">
+								<div className="text-center">
+									<span className="text-black">Rondas totales: </span>
+									<span className="font-bold text-purple-900">{rounds}</span>
+								</div>
+							</div>
 						</div>
 					</div>
 				</>

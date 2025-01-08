@@ -17,6 +17,7 @@ export const Lobby = () => {
     wordTree,
     extraWords,
     removeExtraWord,
+    mergeExtraWords,
   } = useWords();
 
   const [roundQuantity, setRoundQuantity] = useState(0);
@@ -85,7 +86,7 @@ export const Lobby = () => {
   };
 
   const wordsWithOneSpaceOnlyFilter = (word: string) => {
-    return word.split(" ").length === 2;
+    return word.split(" ").length <= 2
   };
 
   const wordsWithSpecialCharactersFilter = (word: string) => {
@@ -108,6 +109,7 @@ export const Lobby = () => {
     }
 
     setRounds(roundQuantity);
+    mergeExtraWords();
     startGame();
   };
 
