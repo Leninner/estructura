@@ -76,7 +76,7 @@ export const Game = () => {
 
 	return (
 		<div className="min-h-screen bg-gradient-to-r from-orange-400 via-yellow-500 to-pink-500 flex flex-col items-center justify-center py-10">
-			<div className="bg-gradient-to-r from-pink-500 to-orange-400 shadow-[4px_4px_0_rgba(0,0,0,1)] rounded-xl p-8 w-full max-w-5xl border-4 border-black">
+			<div className="bg-gradient-to-r from-pink-500 to-orange-400 shadow-[4px_4px_0_rgba(0,0,0,1)] rounded-xl p-8 w-full max-w-7xl border-4 border-black">
 				<Summary
 					word={currentWord}
 					hasFinished={hasFinished}
